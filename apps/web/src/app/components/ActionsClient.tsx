@@ -74,6 +74,7 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
         <div>
           <label className="block text-[10px] text-slate-500 tracking-widest mb-1.5">AGENT</label>
           <select
+          title='select'
             value={agentFilter}
             onChange={(e) => handleFilter(e.target.value, statusFilter, typeFilter)}
             className="bg-surface-3 border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-accent-purple"
@@ -87,6 +88,7 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
         <div>
           <label className="block text-[10px] text-slate-500 tracking-widest mb-1.5">STATUS</label>
           <select
+          title='select'
             value={statusFilter}
             onChange={(e) => handleFilter(agentFilter, e.target.value, typeFilter)}
             className="bg-surface-3 border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-accent-purple"
@@ -99,6 +101,7 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
         <div>
           <label className="block text-[10px] text-slate-500 tracking-widest mb-1.5">TYPE</label>
           <select
+          title='select'
             value={typeFilter}
             onChange={(e) => handleFilter(agentFilter, statusFilter, e.target.value)}
             className="bg-surface-3 border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-accent-purple"
@@ -150,7 +153,7 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
                       )}
                     >
                       <td className="px-5 py-3 text-slate-400">
-                        {new Date(action.startedAt).toLocaleTimeString()}
+                        {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                       </td>
                       <td className="px-5 py-3 text-accent-cyan">
                         {agent?.name ?? action.agentId.slice(0, 8) + '…'}

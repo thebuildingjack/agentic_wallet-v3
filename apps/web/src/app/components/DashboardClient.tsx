@@ -267,7 +267,7 @@ export function DashboardClient({ initialAgents, initialHealth, initialRecentAct
                   </span>
                 </div>
                 <span className="text-[10px] text-slate-500 font-mono">
-                  {new Date(action.startedAt).toLocaleTimeString()}
+                  {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                 </span>
               </button>
             ))}

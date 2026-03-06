@@ -102,10 +102,11 @@ export function BottomSheet({ action, onClose }: BottomSheetProps) {
             )}
             <div className="bg-surface-3 rounded-lg p-3 border border-border">
               <p className="text-[10px] text-slate-500 tracking-widest mb-1">STARTED</p>
-              <p className="font-mono text-white">{new Date(action.startedAt).toLocaleTimeString()}</p>
+              <p className="font-mono text-white">
+                {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+              </p>
             </div>
           </div>
-
           {action.status === 'SUCCESS' && (
             <p className="text-center text-xs text-slate-500 font-mono">Auto-closing in 5s…</p>
           )}

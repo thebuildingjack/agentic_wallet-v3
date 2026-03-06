@@ -99,8 +99,8 @@ export function AgentDetailClient({ agent: initialAgent, initialActions }: Props
             ) : (
               <p className="text-slate-500 font-mono text-sm">—</p>
             )}
-            <p className="text-xs text-slate-600 font-mono mt-1">
-              {agent.lastActionAt ? new Date(agent.lastActionAt).toLocaleTimeString() : ''}
+            <p suppressHydrationWarning className="text-xs text-slate-600 font-mono mt-1">
+              {agent.lastActionAt ? new Date(agent.lastActionAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : ''}
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ export function AgentDetailClient({ agent: initialAgent, initialActions }: Props
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-mono text-slate-500">
-                    {new Date(action.startedAt).toLocaleTimeString()}
+                    {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                   </p>
                   {action.amount != null && (
                     <p className="text-[10px] font-mono text-slate-400">
