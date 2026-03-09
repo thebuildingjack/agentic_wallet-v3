@@ -11,17 +11,28 @@ const nav = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [rendered, setRendered] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  // Close drawer on route change
+  function openDrawer() {
+    setRendered(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setVisible(true));
+    });
+  }
+
+  function closeDrawer() {
+    setVisible(false);
+    setTimeout(() => setRendered(false), 320);
+  }
+
   useEffect(() => {
-    setMobileOpen(false);
+    closeDrawer();
   }, [pathname]);
 
-  // ESC to close
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setMobileOpen(false);
+      if (e.key === 'Escape') closeDrawer();
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -29,7 +40,7 @@ export function Sidebar() {
 
   return (
     <>
-      {/* ── MOBILE: fixed top bar ── */}
+      {/* MOBILE: fixed top bar */}
       <header className="sm:hidden fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 py-3 bg-surface-1 border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-accent-purple text-xl">◈</span>
@@ -39,7 +50,7 @@ export function Sidebar() {
           </div>
         </div>
         <button
-          onClick={() => setMobileOpen(true)}
+          onClick={openDrawer}
           aria-label="Open menu"
           className="w-11 h-11 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-surface-3 transition-colors"
         >
@@ -51,21 +62,27 @@ export function Sidebar() {
         </button>
       </header>
 
-      {/* ── MOBILE: drawer overlay ── */}
-      {mobileOpen && (
-        <div
-          className="sm:hidden fixed inset-0 z-50 flex"
-          role="dialog"
-          aria-modal="true"
-        >
-          {/* Backdrop */}
+      {/* MOBILE: animated drawer */}
+      {rendered && (
+        <div className="sm:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
+          {/* Backdrop — fades in/out */}
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeDrawer}
+            style={{ transition: 'opacity 300ms ease' }}
+            className={clsx(
+              'absolute inset-0 bg-black/70 backdrop-blur-sm',
+              visible ? 'opacity-100' : 'opacity-0'
+            )}
           />
-          {/* Drawer panel */}
-          <aside className="relative w-64 max-w-[80vw] bg-surface-1 border-r border-border flex flex-col h-full z-10">
-            {/* Header */}
+
+          {/* Drawer panel — slides in from left */}
+          <aside
+            style={{ transition: 'transform 300ms cubic-bezier(0.32, 0.72, 0, 1)' }}
+            className={clsx(
+              'relative w-64 max-w-[80vw] bg-surface-1 border-r border-border flex flex-col h-full z-10',
+              visible ? 'translate-x-0' : '-translate-x-full'
+            )}
+          >
             <div className="px-5 py-5 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-accent-purple text-2xl">◈</span>
@@ -75,24 +92,29 @@ export function Sidebar() {
                 </div>
               </div>
               <button
-                onClick={() => setMobileOpen(false)}
+                onClick={closeDrawer}
                 aria-label="Close menu"
-                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-surface-3 transition-colors"
+                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-surface-3 transition-colors text-xl"
               >
                 ×
               </button>
             </div>
-            {/* Nav */}
+
+            {/* Nav items — staggered fade + slide up */}
             <nav className="flex-1 px-3 py-4 space-y-1">
-              {nav.map((item) => (
+              {nav.map((item, i) => (
                 <Link
                   key={item.href}
                   href={item.href}
+                  style={{
+                    transition: `opacity 250ms ease ${i * 60 + 120}ms, transform 250ms ease ${i * 60 + 120}ms`,
+                  }}
                   className={clsx(
-                    'flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-all duration-150 min-h-[44px]',
+                    'flex items-center gap-3 px-3 py-3 rounded-lg text-sm min-h-[44px]',
+                    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2',
                     pathname === item.href
                       ? 'bg-accent-purple/20 text-white border border-accent-purple/40 glow-purple'
-                      : 'text-slate-400 hover:text-white hover:bg-surface-3'
+                      : 'text-slate-400 hover:text-white hover:bg-surface-3 transition-colors duration-150'
                   )}
                 >
                   <span className="text-base">{item.icon}</span>
@@ -100,8 +122,15 @@ export function Sidebar() {
                 </Link>
               ))}
             </nav>
-            {/* Footer */}
-            <div className="px-4 py-4 border-t border-border">
+
+            {/* Footer — fades in with delay */}
+            <div
+              style={{ transition: 'opacity 250ms ease 240ms' }}
+              className={clsx(
+                'px-4 py-4 border-t border-border',
+                visible ? 'opacity-100' : 'opacity-0'
+              )}
+            >
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-accent-green status-live" />
                 <span className="text-xs text-slate-500 font-mono">devnet</span>
@@ -112,9 +141,8 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* ── DESKTOP: static sidebar ── */}
+      {/* DESKTOP: static sidebar */}
       <aside className="hidden sm:flex w-56 flex-shrink-0 border-r border-border flex-col bg-surface-1">
-        {/* Logo */}
         <div className="px-5 py-5 border-b border-border">
           <div className="flex items-center gap-2">
             <span className="text-accent-purple text-2xl">◈</span>
@@ -125,7 +153,6 @@ export function Sidebar() {
           </div>
           <p className="text-[10px] text-slate-500 mt-1 font-mono">devnet observer</p>
         </div>
-        {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
           {nav.map((item) => (
             <Link
@@ -143,7 +170,6 @@ export function Sidebar() {
             </Link>
           ))}
         </nav>
-        {/* Footer */}
         <div className="px-4 py-4 border-t border-border">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-accent-green status-live" />
