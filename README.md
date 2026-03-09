@@ -157,7 +157,7 @@ npm install -g pnpm
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/france-auth/agentic_wallet-v3
+git clone https://github.com/thebuildingjack/agentic_wallet-v3
 cd agentic_wallet-v3
 pnpm install
 ```
