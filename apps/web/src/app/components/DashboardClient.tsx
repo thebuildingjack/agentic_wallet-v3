@@ -80,24 +80,24 @@ export function DashboardClient({ initialAgents, initialHealth, initialRecentAct
   const harnessRunning = health?.harness.running ?? false;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 fade-in">
+    <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto space-y-4 sm:space-y-6 fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white tracking-wide">
+          <h1 className="font-display text-xl sm:text-2xl font-bold text-white tracking-wide">
             Agent Dashboard
           </h1>
-          <p className="text-sm text-slate-400 font-mono mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 font-mono mt-1">
             {agents.length} agent{agents.length !== 1 ? 's' : ''} · devnet
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Harness toggle */}
+        {/* Action buttons — wrap on mobile */}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleHarnessToggle}
             disabled={loading === 'harness'}
             className={clsx(
-              'px-4 py-2 rounded-lg text-sm font-mono border transition-all',
+              'min-h-[44px] px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-mono border transition-all',
               harnessRunning
                 ? 'bg-accent-red/20 border-accent-red/40 text-accent-red hover:bg-accent-red/30'
                 : 'bg-accent-green/20 border-accent-green/40 text-accent-green hover:bg-accent-green/30'
@@ -105,69 +105,70 @@ export function DashboardClient({ initialAgents, initialHealth, initialRecentAct
           >
             {loading === 'harness' ? '...' : harnessRunning ? '⏹ Stop Loop' : '▶ Start Loop'}
           </button>
-          {/* Run all once */}
           <button
             onClick={handleRunAll}
             disabled={!!loading || agents.length === 0}
-            className="px-4 py-2 rounded-lg text-sm font-mono border border-accent-purple/40 bg-accent-purple/20 text-accent-purple hover:bg-accent-purple/30 transition-all disabled:opacity-40"
+            className="min-h-[44px] px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-mono border border-accent-purple/40 bg-accent-purple/20 text-accent-purple hover:bg-accent-purple/30 transition-all disabled:opacity-40"
           >
             {loading === 'runAll' ? '...' : '⚡ Run All'}
           </button>
-          {/* Refresh */}
           <button
             onClick={refreshAll}
-            className="px-3 py-2 rounded-lg text-sm font-mono border border-border text-slate-400 hover:text-white hover:border-slate-500 transition-all"
+            aria-label="Refresh"
+            className="min-h-[44px] px-3 py-2 rounded-lg text-sm font-mono border border-border text-slate-400 hover:text-white hover:border-slate-500 transition-all"
           >
             ↻
           </button>
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* Stats row — 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: 'Agents', value: agents.length, color: 'text-accent-cyan' },
           { label: 'Successful', value: recentActions.filter(a => a.status === 'SUCCESS').length, color: 'text-accent-green' },
           { label: 'Failed', value: recentActions.filter(a => a.status === 'FAILED').length, color: 'text-accent-red' },
           { label: 'Harness Cycles', value: health?.harness.cyclesRun ?? 0, color: 'text-accent-purple' },
         ].map((s) => (
-          <div key={s.label} className="bg-surface-2 border border-border rounded-xl p-4">
+          <div key={s.label} className="bg-surface-2 border border-border rounded-xl p-3 sm:p-4">
             <p className="text-[10px] text-slate-500 tracking-widest font-mono mb-1">{s.label.toUpperCase()}</p>
-            <p className={clsx('text-3xl font-display font-bold', s.color)}>{s.value}</p>
+            <p className={clsx('text-2xl sm:text-3xl font-display font-bold', s.color)}>{s.value}</p>
           </div>
         ))}
       </div>
 
       {/* Create agents */}
-      <div className="bg-surface-2 border border-border rounded-xl p-5">
-        <h2 className="font-display font-semibold text-white mb-3">Create Agents</h2>
-        <div className="flex items-center gap-3">
+      <div className="bg-surface-2 border border-border rounded-xl p-4 sm:p-5">
+        <h2 className="font-display font-semibold text-white mb-3 text-sm sm:text-base">Create Agents</h2>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <input
-            title='number'
+            title="number"
             type="number"
             min={1}
             max={20}
             value={createCount}
             onChange={(e) => setCreateCount(parseInt(e.target.value) || 1)}
-            className="w-20 px-3 py-2 bg-surface-3 border border-border rounded-lg font-mono text-sm text-white focus:outline-none focus:border-accent-purple"
+            className="w-16 sm:w-20 px-3 py-2 bg-surface-3 border border-border rounded-lg font-mono text-sm text-white focus:outline-none focus:border-accent-purple min-h-[44px]"
           />
-          <span className="text-sm text-slate-400 font-mono">agents</span>
+          <span className="text-xs sm:text-sm text-slate-400 font-mono">agents</span>
           <button
-            type='button'
+            type="button"
             onClick={handleCreateAgents}
             disabled={loading === 'create'}
-            className="px-4 py-2 rounded-lg text-sm font-mono bg-accent-cyan/20 border border-accent-cyan/40 text-accent-cyan hover:bg-accent-cyan/30 transition-all disabled:opacity-40"
+            className="min-h-[44px] px-4 py-2 rounded-lg text-xs sm:text-sm font-mono bg-accent-cyan/20 border border-accent-cyan/40 text-accent-cyan hover:bg-accent-cyan/30 transition-all disabled:opacity-40"
           >
             {loading === 'create' ? 'Creating...' : '+ Create'}
           </button>
-          <p className="text-xs text-slate-500 font-mono">Airdrops SOL + creates SPL mint + mints tokens to each agent</p>
+          <p className="w-full sm:w-auto text-[10px] sm:text-xs text-slate-500 font-mono">
+            Airdrops SOL + creates SPL mint + mints tokens
+          </p>
         </div>
       </div>
 
-      {/* Agents table */}
+      {/* Agents — table on desktop, cards on mobile */}
       <div className="bg-surface-2 border border-border rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="font-display font-semibold text-white">Agents</h2>
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border">
+          <h2 className="font-display font-semibold text-white text-sm sm:text-base">Agents</h2>
           <span className="text-xs text-slate-500 font-mono">{agents.length} total</span>
         </div>
 
@@ -178,74 +179,104 @@ export function DashboardClient({ initialAgents, initialHealth, initialRecentAct
             <p className="text-slate-600 font-mono text-xs mt-1">Create agents above to get started.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm font-mono">
-              <thead>
-                <tr className="text-[10px] text-slate-500 tracking-widest border-b border-border">
-                  <th className="px-5 py-3 text-left">NAME</th>
-                  <th className="px-5 py-3 text-left">PUBLIC KEY</th>
-                  <th className="px-5 py-3 text-right">SOL</th>
-                  <th className="px-5 py-3 text-right">SPL</th>
-                  <th className="px-5 py-3 text-left">LAST STATUS</th>
-                  <th className="px-5 py-3 text-right">ACTION</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agents.map((agent, i) => (
-                  <tr
-                    key={agent.id}
-                    className={clsx(
-                      'border-b border-border/50 hover:bg-surface-3/50 transition-colors',
-                      i % 2 === 0 ? 'bg-surface-1/30' : ''
-                    )}
-                  >
-                    <td className="px-5 py-3">
-                      <Link
-                        href={`/agents/${agent.id}`}
-                        className="text-accent-cyan hover:text-cyan-300 font-semibold"
-                      >
-                        {agent.name}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-slate-400">
-                      <span title={agent.publicKey}>
-                        {agent.publicKey.slice(0, 8)}…{agent.publicKey.slice(-6)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-right text-white">
-                      {agent.solBalance.toFixed(4)}
-                    </td>
-                    <td className="px-5 py-3 text-right text-slate-300">
-                      {agent.splBalance.toFixed(2)}
-                    </td>
-                    <td className="px-5 py-3">
-                      {agent.lastActionStatus ? (
-                        <StatusBadge status={agent.lastActionStatus} />
-                      ) : (
-                        <span className="text-slate-600 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <button
-                        onClick={() => handleRunOnce(agent.id)}
-                        disabled={!!loading}
-                        className="px-3 py-1 rounded text-xs font-mono bg-accent-purple/20 border border-accent-purple/30 text-accent-purple hover:bg-accent-purple/30 transition-all disabled:opacity-40"
-                      >
-                        {loading === agent.id ? '...' : '▶ Run'}
-                      </button>
-                    </td>
+          <>
+            {/* Mobile: card list */}
+            <div className="sm:hidden divide-y divide-border/50">
+              {agents.map((agent) => (
+                <div key={agent.id} className="px-4 py-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={`/agents/${agent.id}`}
+                      className="text-accent-cyan font-semibold font-mono text-sm hover:text-cyan-300"
+                    >
+                      {agent.name}
+                    </Link>
+                    <button
+                      onClick={() => handleRunOnce(agent.id)}
+                      disabled={!!loading}
+                      className="min-h-[36px] px-3 py-1 rounded text-xs font-mono bg-accent-purple/20 border border-accent-purple/30 text-accent-purple hover:bg-accent-purple/30 transition-all disabled:opacity-40"
+                    >
+                      {loading === agent.id ? '...' : '▶ Run'}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-mono truncate">
+                    {agent.publicKey.slice(0, 12)}…{agent.publicKey.slice(-8)}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs font-mono">
+                    <span className="text-white">{agent.solBalance.toFixed(4)} <span className="text-slate-500">SOL</span></span>
+                    <span className="text-slate-300">{agent.splBalance.toFixed(2)} <span className="text-slate-500">SPL</span></span>
+                    {agent.lastActionStatus && <StatusBadge status={agent.lastActionStatus} />}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm font-mono">
+                <thead>
+                  <tr className="text-[10px] text-slate-500 tracking-widest border-b border-border">
+                    <th className="px-5 py-3 text-left">NAME</th>
+                    <th className="px-5 py-3 text-left">PUBLIC KEY</th>
+                    <th className="px-5 py-3 text-right">SOL</th>
+                    <th className="px-5 py-3 text-right">SPL</th>
+                    <th className="px-5 py-3 text-left">LAST STATUS</th>
+                    <th className="px-5 py-3 text-right">ACTION</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {agents.map((agent, i) => (
+                    <tr
+                      key={agent.id}
+                      className={clsx(
+                        'border-b border-border/50 hover:bg-surface-3/50 transition-colors',
+                        i % 2 === 0 ? 'bg-surface-1/30' : ''
+                      )}
+                    >
+                      <td className="px-5 py-3">
+                        <Link
+                          href={`/agents/${agent.id}`}
+                          className="text-accent-cyan hover:text-cyan-300 font-semibold"
+                        >
+                          {agent.name}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 text-slate-400">
+                        <span title={agent.publicKey}>
+                          {agent.publicKey.slice(0, 8)}…{agent.publicKey.slice(-6)}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-right text-white">{agent.solBalance.toFixed(4)}</td>
+                      <td className="px-5 py-3 text-right text-slate-300">{agent.splBalance.toFixed(2)}</td>
+                      <td className="px-5 py-3">
+                        {agent.lastActionStatus ? (
+                          <StatusBadge status={agent.lastActionStatus} />
+                        ) : (
+                          <span className="text-slate-600 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button
+                          onClick={() => handleRunOnce(agent.id)}
+                          disabled={!!loading}
+                          className="px-3 py-1 rounded text-xs font-mono bg-accent-purple/20 border border-accent-purple/30 text-accent-purple hover:bg-accent-purple/30 transition-all disabled:opacity-40"
+                        >
+                          {loading === agent.id ? '...' : '▶ Run'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
       {/* Recent actions */}
       <div className="bg-surface-2 border border-border rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="font-display font-semibold text-white">Recent Actions</h2>
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border">
+          <h2 className="font-display font-semibold text-white text-sm sm:text-base">Recent Actions</h2>
           <Link href="/actions" className="text-xs text-accent-purple font-mono hover:text-purple-300">
             View all →
           </Link>
@@ -258,15 +289,15 @@ export function DashboardClient({ initialAgents, initialHealth, initialRecentAct
               <button
                 key={action.id}
                 onClick={() => setSelectedAction(action)}
-                className="w-full flex items-center justify-between px-5 py-3 hover:bg-surface-3/50 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 sm:px-5 py-3 hover:bg-surface-3/50 transition-colors text-left min-h-[44px]"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <StatusBadge status={action.status} />
                   <span className="text-xs font-mono text-slate-300">
                     {action.type.replace('ACTION_', '')}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono">
+                <span suppressHydrationWarning className="text-[10px] text-slate-500 font-mono">
                   {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                 </span>
               </button>

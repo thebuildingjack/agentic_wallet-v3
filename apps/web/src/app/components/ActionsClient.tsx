@@ -27,6 +27,7 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
   const [offset, setOffset] = useState(0);
   const [selectedAction, setSelectedAction] = useState<ActionRecord | null>(null);
   const [loading, setLoading] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const LIMIT = 20;
 
   const fetchActions = useCallback(async (ag: string, st: string, ty: string, off: number) => {
@@ -61,23 +62,44 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
 
   const totalPages = Math.ceil(total / LIMIT);
   const currentPage = Math.floor(offset / LIMIT) + 1;
+  const hasActiveFilters = !!(agentFilter || statusFilter || typeFilter);
+
+  const selectClass = "bg-surface-3 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent-purple min-h-[44px] w-full";
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-5 fade-in">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-white tracking-wide">Action Feed</h1>
-        <p className="text-sm text-slate-400 font-mono mt-1">{total} total actions</p>
+    <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-6xl mx-auto space-y-4 sm:space-y-5 fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-xl sm:text-2xl font-bold text-white tracking-wide">Action Feed</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-mono mt-1">{total} total actions</p>
+        </div>
+        {/* Mobile: toggle filters button */}
+        <button
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className={clsx(
+            'sm:hidden min-h-[44px] px-3 py-2 rounded-lg text-xs font-mono border transition-colors flex items-center gap-1.5',
+            hasActiveFilters
+              ? 'border-accent-purple/40 text-accent-purple bg-accent-purple/10'
+              : 'border-border text-slate-400 hover:text-white'
+          )}
+        >
+          ⚙ Filters{hasActiveFilters ? ' •' : ''}
+        </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-surface-2 border border-border rounded-xl p-4 flex flex-wrap gap-3 items-end">
-        <div>
+      {/* Filters — always visible on desktop, toggle on mobile */}
+      <div className={clsx(
+        'bg-surface-2 border border-border rounded-xl p-4',
+        'sm:flex sm:flex-wrap sm:gap-3 sm:items-end',
+        filtersOpen ? 'block' : 'hidden sm:flex'
+      )}>
+        <div className="mb-3 sm:mb-0">
           <label className="block text-[10px] text-slate-500 tracking-widest mb-1.5">AGENT</label>
           <select
-          title='select'
+            title="select"
             value={agentFilter}
             onChange={(e) => handleFilter(e.target.value, statusFilter, typeFilter)}
-            className="bg-surface-3 border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-accent-purple"
+            className={selectClass}
           >
             <option value="">All Agents</option>
             {agents.map((a) => (
@@ -85,106 +107,141 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
             ))}
           </select>
         </div>
-        <div>
+        <div className="mb-3 sm:mb-0">
           <label className="block text-[10px] text-slate-500 tracking-widest mb-1.5">STATUS</label>
           <select
-          title='select'
+            title="select"
             value={statusFilter}
             onChange={(e) => handleFilter(agentFilter, e.target.value, typeFilter)}
-            className="bg-surface-3 border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-accent-purple"
+            className={selectClass}
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>{s || 'All Statuses'}</option>
             ))}
           </select>
         </div>
-        <div>
+        <div className="mb-3 sm:mb-0">
           <label className="block text-[10px] text-slate-500 tracking-widest mb-1.5">TYPE</label>
           <select
-          title='select'
+            title="select"
             value={typeFilter}
             onChange={(e) => handleFilter(agentFilter, statusFilter, e.target.value)}
-            className="bg-surface-3 border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-accent-purple"
+            className={selectClass}
           >
             {ACTION_TYPES.map((t) => (
               <option key={t} value={t}>{typeLabel(t)}</option>
             ))}
           </select>
         </div>
-        {(agentFilter || statusFilter || typeFilter) && (
+        {hasActiveFilters && (
           <button
             onClick={() => handleFilter('', '', '')}
-            className="px-3 py-1.5 text-xs font-mono text-slate-400 hover:text-white border border-border rounded-lg transition-colors"
+            className="min-h-[44px] w-full sm:w-auto px-3 py-2 text-xs font-mono text-slate-400 hover:text-white border border-border rounded-lg transition-colors"
           >
-            ✕ Clear
+            ✕ Clear Filters
           </button>
         )}
       </div>
 
-      {/* Table */}
+      {/* Actions list */}
       <div className="bg-surface-2 border border-border rounded-xl overflow-hidden">
         {loading ? (
           <div className="py-16 text-center text-slate-400 font-mono text-sm">Loading...</div>
         ) : actions.length === 0 ? (
           <div className="py-16 text-center text-slate-500 font-mono text-sm">No actions found.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs font-mono">
-              <thead>
-                <tr className="text-[10px] text-slate-500 tracking-widest border-b border-border bg-surface-1/50">
-                  <th className="px-5 py-3 text-left">TIME</th>
-                  <th className="px-5 py-3 text-left">AGENT</th>
-                  <th className="px-5 py-3 text-left">TYPE</th>
-                  <th className="px-5 py-3 text-left">STATUS</th>
-                  <th className="px-5 py-3 text-left">SIGNATURE</th>
-                  <th className="px-5 py-3 text-right">AMOUNT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {actions.map((action, i) => {
-                  const agent = agents.find(a => a.id === action.agentId);
-                  return (
-                    <tr
-                      key={action.id}
-                      onClick={() => setSelectedAction(action)}
-                      className={clsx(
-                        'border-b border-border/40 cursor-pointer hover:bg-surface-3/60 transition-colors',
-                        i % 2 === 0 ? '' : 'bg-surface-1/20'
-                      )}
-                    >
-                      <td className="px-5 py-3 text-slate-400">
-                        {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-                      </td>
-                      <td className="px-5 py-3 text-accent-cyan">
-                        {agent?.name ?? action.agentId.slice(0, 8) + '…'}
-                      </td>
-                      <td className="px-5 py-3 text-slate-300">
-                        {action.type.replace('ACTION_', '')}
-                      </td>
-                      <td className="px-5 py-3">
+          <>
+            {/* Mobile: card list */}
+            <div className="sm:hidden divide-y divide-border/40">
+              {actions.map((action) => {
+                const agent = agents.find(a => a.id === action.agentId);
+                return (
+                  <button
+                    key={action.id}
+                    onClick={() => setSelectedAction(action)}
+                    className="w-full px-4 py-3 text-left hover:bg-surface-3/60 transition-colors min-h-[60px]"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
                         <StatusBadge status={action.status} />
-                      </td>
-                      <td className="px-5 py-3 text-slate-500">
-                        {action.signature
-                          ? `${action.signature.slice(0, 10)}…`
-                          : action.error
-                          ? <span className="text-accent-red/70 text-[10px]">{action.error.slice(0, 30)}…</span>
-                          : '—'}
-                      </td>
-                      <td className="px-5 py-3 text-right text-slate-300">
-                        {action.amount?.toLocaleString() ?? '—'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <span className="text-xs font-mono text-slate-300">
+                          {action.type.replace('ACTION_', '')}
+                        </span>
+                      </div>
+                      <span suppressHydrationWarning className="text-[10px] text-slate-500 font-mono">
+                        {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-mono text-slate-500">
+                      <span className="text-accent-cyan/80">{agent?.name ?? action.agentId.slice(0, 8) + '…'}</span>
+                      {action.signature && <span>{action.signature.slice(0, 12)}…</span>}
+                      {action.error && <span className="text-accent-red/70">{action.error.slice(0, 30)}…</span>}
+                      {action.amount != null && <span>{action.amount.toLocaleString()} units</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Desktop: full table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-xs font-mono">
+                <thead>
+                  <tr className="text-[10px] text-slate-500 tracking-widest border-b border-border bg-surface-1/50">
+                    <th className="px-5 py-3 text-left">TIME</th>
+                    <th className="px-5 py-3 text-left">AGENT</th>
+                    <th className="px-5 py-3 text-left">TYPE</th>
+                    <th className="px-5 py-3 text-left">STATUS</th>
+                    <th className="px-5 py-3 text-left">SIGNATURE</th>
+                    <th className="px-5 py-3 text-right">AMOUNT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {actions.map((action, i) => {
+                    const agent = agents.find(a => a.id === action.agentId);
+                    return (
+                      <tr
+                        key={action.id}
+                        onClick={() => setSelectedAction(action)}
+                        className={clsx(
+                          'border-b border-border/40 cursor-pointer hover:bg-surface-3/60 transition-colors',
+                          i % 2 === 0 ? '' : 'bg-surface-1/20'
+                        )}
+                      >
+                        <td suppressHydrationWarning className="px-5 py-3 text-slate-400">
+                          {new Date(action.startedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                        </td>
+                        <td className="px-5 py-3 text-accent-cyan">
+                          {agent?.name ?? action.agentId.slice(0, 8) + '…'}
+                        </td>
+                        <td className="px-5 py-3 text-slate-300">
+                          {action.type.replace('ACTION_', '')}
+                        </td>
+                        <td className="px-5 py-3">
+                          <StatusBadge status={action.status} />
+                        </td>
+                        <td className="px-5 py-3 text-slate-500">
+                          {action.signature
+                            ? `${action.signature.slice(0, 10)}…`
+                            : action.error
+                            ? <span className="text-accent-red/70 text-[10px]">{action.error.slice(0, 30)}…</span>
+                            : '—'}
+                        </td>
+                        <td className="px-5 py-3 text-right text-slate-300">
+                          {action.amount?.toLocaleString() ?? '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-t border-border flex-wrap gap-2">
             <span className="text-xs text-slate-500 font-mono">
               Page {currentPage} of {totalPages} · {total} total
             </span>
@@ -192,14 +249,14 @@ export function ActionsClient({ initialActions, initialTotal, agents }: Props) {
               <button
                 onClick={() => handlePage(offset - LIMIT)}
                 disabled={offset === 0}
-                className="px-3 py-1 text-xs font-mono border border-border rounded text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
+                className="min-h-[44px] px-3 py-1 text-xs font-mono border border-border rounded text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
               >
                 ← Prev
               </button>
               <button
                 onClick={() => handlePage(offset + LIMIT)}
                 disabled={offset + LIMIT >= total}
-                className="px-3 py-1 text-xs font-mono border border-border rounded text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
+                className="min-h-[44px] px-3 py-1 text-xs font-mono border border-border rounded text-slate-400 hover:text-white disabled:opacity-30 transition-colors"
               >
                 Next →
               </button>
